@@ -1,4 +1,4 @@
-# CareerPath AI - AI-Powered Career Development Platform
+# The-Setu : Student Skill Progression Website
 
 **A comprehensive career development and skill gap analysis platform built with React, TypeScript, and Tailwind CSS**
 
@@ -372,7 +372,7 @@ This project is created for educational purposes as a final-year engineering pro
 ## 📞 Support
 
 For questions or issues:
-- 📧 Email: support@careerpath.ai
+- 📧 Email: support@the-setu.ai
 - 📱 Phone: 1-800-CAREER
 - 💬 Live Chat: Available in Settings → Support
 
