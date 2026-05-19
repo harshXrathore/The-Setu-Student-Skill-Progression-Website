@@ -6,7 +6,7 @@
 
 ## 🎯 Project Overview
 
-**The-Setu** (formerly CareerPath AI) is an innovative, full-stack career development platform designed to bridge the gap between academic learning and industry requirements. The platform helps students, career switchers, and educational institutions identify skill gaps, generate adaptive learning paths, and ultimately achieve their career goals efficiently.
+**The-Setu** is an innovative, full-stack career development platform designed to bridge the gap between academic learning and industry requirements. The platform helps students, career switchers, and educational institutions identify skill gaps, generate adaptive learning paths, and ultimately achieve their career goals efficiently.
 
 ### Key Features
 
