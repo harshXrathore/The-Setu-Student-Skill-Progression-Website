@@ -1,18 +1,14 @@
-<<<<<<< HEAD
-# CareerPath AI - AI-Powered Career Development Platform
-
-**A comprehensive career development and skill gap analysis platform built with React, TypeScript, and Tailwind CSS**
-=======
 # The-Setu - AI-Powered Career Development Platform
 
+## 🚀 Live Demo - https://the-setu-student-skill-progression.onrender.com
+
 **A comprehensive career development, skill gap analysis, and adaptive learning platform built with the MERN stack and AI.**
->>>>>>> 322b12c50e9bedc5448cb5fcf8909928ef353a0f
 
 ---
 
 ## 🎯 Project Overview
 
-<<<<<<< HEAD
+
 CareerPath AI is an innovative, AI-powered career development platform designed to bridge the gap between academic learning and industry requirements. The platform helps students, career switchers, and educational institutions identify and fill skill gaps to achieve career goals efficiently.
 
 ### Key Features
@@ -27,7 +23,7 @@ CareerPath AI is an innovative, AI-powered career development platform designed 
 ✅ **AI Chat Assistant** - Get career guidance instantly  
 ✅ **Job Board** - Discover opportunities matched to your skills  
 ✅ **Learning Courses** - Curated courses with progress tracking  
-=======
+
 **The-Setu** is an innovative, full-stack career development platform designed to bridge the gap between academic learning and industry requirements. The platform helps students, career switchers, and educational institutions identify skill gaps, generate adaptive learning paths, and ultimately achieve their career goals efficiently.
 
 ### Key Features
@@ -40,9 +36,7 @@ CareerPath AI is an innovative, AI-powered career development platform designed 
 - **Gamification & Progress Tracking** - Achievement badges, daily login streaks, points system, and activity heatmaps (Recharts).
 - **Robust Security & Auth** - 3-step OTP-verified signup (via Nodemailer), secure JWT authentication, and strict Role-Based Access Control (RBAC).
 - **Comprehensive Admin Panel** - Complete oversight of the platform including user management, career paths, job moderation, and system audit logs.
->>>>>>> 322b12c50e9bedc5448cb5fcf8909928ef353a0f
 
----
 
 ## 🏗️ Technology Stack
 
@@ -565,4 +559,3 @@ To keep learners engaged, The-Setu features a comprehensive gamification engine:
 **The-Setu** demonstrates the practical application of modern web technologies, AI/ML concepts, and user-centered design to solve real-world career development challenges. Built as a comprehensive academic project for the **Academic Year 2025-2026**.
 
 **Built for the future of adaptive learning and career readiness.** 🚀
->>>>>>> 322b12c50e9bedc5448cb5fcf8909928ef353a0f
