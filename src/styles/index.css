@@ -1,8 +1,0 @@
-@import './fonts.css';
-@import './tailwind.css';
-@import './theme.css';
-@keyframes shimmer {
-    100% {
-        transform: skewX(-12deg) translateX(250%);
-    }
-}
