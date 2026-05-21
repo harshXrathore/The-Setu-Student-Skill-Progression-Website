@@ -28,7 +28,12 @@ try {
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "https://the-setu-student-skill-progression.onrender.com",
+    credentials: true,
+  }),
+);
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -75,4 +80,3 @@ app.use((err, req, res, next) => {
 app.listen(port, () => {
   console.log(`CareerPath AI Server running at http://localhost:${port}`);
 });
-jhjjjjz;
