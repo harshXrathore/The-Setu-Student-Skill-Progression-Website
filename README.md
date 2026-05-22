@@ -9,7 +9,7 @@
 ## 🎯 Project Overview
 
 
-CareerPath AI is an innovative, AI-powered career development platform designed to bridge the gap between academic learning and industry requirements. The platform helps students, career switchers, and educational institutions identify and fill skill gaps to achieve career goals efficiently.
+The-Setu is an innovative, AI-powered career development platform designed to bridge the gap between academic learning and industry requirements. The platform helps students, career switchers, and educational institutions identify and fill skill gaps to achieve career goals efficiently.
 
 ### Key Features
 
@@ -23,19 +23,6 @@ CareerPath AI is an innovative, AI-powered career development platform designed 
 ✅ **AI Chat Assistant** - Get career guidance instantly  
 ✅ **Job Board** - Discover opportunities matched to your skills  
 ✅ **Learning Courses** - Curated courses with progress tracking  
-
-**The-Setu** is an innovative, full-stack career development platform designed to bridge the gap between academic learning and industry requirements. The platform helps students, career switchers, and educational institutions identify skill gaps, generate adaptive learning paths, and ultimately achieve their career goals efficiently.
-
-### Key Features
-
-- **AI-Based Skill Gap Analysis** - Compares user skills against live job market requirements in real-time.
-- **Personalized & Adaptive Learning Roadmaps** - 3-phase AI-generated paths (Beginner → Intermediate → Advanced) powered by Google Gemini, which adapt dynamically based on quiz mistake detection.
-- **AI Career Prediction** - Ranks top 3 matching careers using a weighted scoring algorithm (skills, progress, goals, market demand) and provides natural language explanations powered by Grok LLM (xAI).
-- **Hybrid Job Board** - A unified board featuring manually posted admin jobs alongside live external listings fetched via the Adzuna API, fully matched to user skill profiles.
-- **Mentor Network & Booking Engine** - Connect with industry experts, book sessions based on live availability, and track mentee progress.
-- **Gamification & Progress Tracking** - Achievement badges, daily login streaks, points system, and activity heatmaps (Recharts).
-- **Robust Security & Auth** - 3-step OTP-verified signup (via Nodemailer), secure JWT authentication, and strict Role-Based Access Control (RBAC).
-- **Comprehensive Admin Panel** - Complete oversight of the platform including user management, career paths, job moderation, and system audit logs.
 
 
 ## 🏗️ Technology Stack
