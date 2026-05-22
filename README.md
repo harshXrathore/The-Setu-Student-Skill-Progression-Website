@@ -40,27 +40,6 @@ CareerPath AI is an innovative, AI-powered career development platform designed 
 
 ## 🏗️ Technology Stack
 
-<<<<<<< HEAD
-### Frontend
-- **React 18.3** - Modern UI library with hooks
-- **TypeScript** - Type-safe development
-- **Tailwind CSS 4.0** - Utility-first styling
-- **Recharts** - Beautiful data visualizations
-- **Lucide React** - Consistent icon system
-
-### Backend (Proposed)
-- **Node.js & Express** - REST API server
-- **Python FastAPI** - ML model serving
-- **PostgreSQL** - Relational data storage
-- **MongoDB** - Flexible document storage
-- **Redis** - Caching layer
-
-### AI/ML (Proposed)
-- **Scikit-learn** - Skill clustering algorithms
-- **TensorFlow** - Deep learning models
-- **NLP Models** - Resume and job description analysis
-- **Recommendation Systems** - Personalized suggestions
-=======
 The project is built on a robust, modern technology stack.
 
 ### Frontend
@@ -83,14 +62,13 @@ The project is built on a robust, modern technology stack.
 - **Google Gemini 1.5 Flash** - Generates dynamic learning roadmaps and powers the AI Chat Assistant.
 - **Grok LLM (xAI)** - Provides deep reasoning and explanations for career predictions.
 - **Adzuna API** - Fetches live, real-world job listings for the hybrid job board.
->>>>>>> 322b12c50e9bedc5448cb5fcf8909928ef353a0f
 
 ---
 
 ## 📁 Project Structure
 
 ```
-<<<<<<< HEAD
+
 /src
 ├── /app
 │   ├── App.tsx                          # Main app component with routing
@@ -126,7 +104,7 @@ The project is built on a robust, modern technology stack.
 │   └── server.js             # Express application entry point
 │
 └── package.json              # Frontend dependencies and scripts
->>>>>>> 322b12c50e9bedc5448cb5fcf8909928ef353a0f
+
 ```
 
 ---
@@ -134,7 +112,6 @@ The project is built on a robust, modern technology stack.
 ## 🚀 Getting Started
 
 ### Prerequisites
-<<<<<<< HEAD
 - Node.js 18+ and npm/pnpm installed
 - Modern web browser
 
