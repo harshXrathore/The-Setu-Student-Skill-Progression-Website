@@ -1,6 +1,6 @@
 # The-Setu - AI-Powered Career Development Platform
 
-## 🚀 Live Demo - https://the-setu-student-skill-progression.onrender.com/
+## 🚀 Live Demo -  https://the-setu-student-skill-progression.onrender.com
 
 **A comprehensive career development, skill gap analysis, and adaptive learning platform built with the MERN stack and AI.**
 
