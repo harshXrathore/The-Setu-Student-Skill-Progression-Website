@@ -520,6 +520,6 @@ To keep learners engaged, The-Setu features a comprehensive gamification engine:
 
 ## 👨‍💻 About The-Setu
 
-**The-Setu** demonstrates the practical application of modern web technologies, AI/ML concepts, and user-centered design to solve real-world career development challenges. Built as a comprehensive academic project for the **Academic Year 2025-2026**.
+**The-Setu** demonstrates the practical application of modern web technologies, AI/ML concepts, and user-centered design to solve real-world career development challenges.
 
 **Built for the future of adaptive learning and career readiness.** 🚀
