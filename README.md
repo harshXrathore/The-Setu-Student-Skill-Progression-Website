@@ -381,7 +381,7 @@ This is an academic project demonstration. For production deployment:
 
 ## 📄 License
 
-This project is created for educational purposes as a final-year engineering project.
+This project is created for educational purposes as a final-year engineering project, and is licensed under the [MIT License](LICENSE).
 
 ---
 
