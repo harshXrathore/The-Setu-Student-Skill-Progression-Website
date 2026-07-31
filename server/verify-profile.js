@@ -14,7 +14,7 @@ async function verifyProfileSystem() {
         const loginRes = await fetch(`${BASE_URL}/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: 'verify2@example.com', password: 'password123' })
+            body: JSON.stringify({ email: 'verify2@example.com', password: process.env.TEST_USER_PASSWORD })
         });
         const loginData = await loginRes.json();
 

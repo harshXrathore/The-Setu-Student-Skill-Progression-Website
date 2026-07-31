@@ -5,7 +5,7 @@ const Profile = require('./models/Profile');
 const Session = require('./models/Session');
 const mentorController = require('./controllers/mentorController');
 
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/dashboard';
+const MONGO_URI = process.env.MONGO_URI;
 
 async function runTests() {
     console.log("Connecting to MongoDB...");
@@ -18,7 +18,7 @@ async function runTests() {
         const mentor = await User.create({
             name: 'Avail Mentor',
             email: mentorEmail,
-            password: 'password123',
+            password: process.env.TEST_USER_PASSWORD,
             role: 'mentor',
             isVerified: true
         });
@@ -43,7 +43,7 @@ async function runTests() {
         const student = await User.create({
             name: 'Avail Student',
             email: `student_avail_${Date.now()}@test.com`,
-            password: 'password123',
+            password: process.env.TEST_USER_PASSWORD,
             role: 'student'
         });
 

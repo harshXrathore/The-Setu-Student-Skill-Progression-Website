@@ -4,7 +4,7 @@ const Notification = require('./models/Notification');
 const Session = require('./models/Session');
 const User = require('./models/User');
 
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/dashboard';
+const MONGO_URI = process.env.MONGO_URI;
 
 async function testNotifs() {
     await mongoose.connect(MONGO_URI);

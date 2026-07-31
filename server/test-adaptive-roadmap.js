@@ -15,7 +15,7 @@ async function runTest() {
     const user = await User.findOne() || await User.create({
         name: "Test Adaptive User",
         email: `test_adaptive_${Date.now()}@example.com`,
-        password: "password123",
+        password: process.env.TEST_USER_PASSWORD,
         role: "student"
     });
 

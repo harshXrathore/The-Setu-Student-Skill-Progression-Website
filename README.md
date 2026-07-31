@@ -428,6 +428,8 @@ For questions or issues:
    ```env
    PORT=5000
    MONGODB_URI=your_mongodb_connection_string
+   MONGO_URI=mongodb://127.0.0.1:27017/dashboard
+   MONGO_URI_RAG=mongodb://127.0.0.1:27017/career-path-ai
    JWT_SECRET=your_jwt_secret_key
    GEMINI_API_KEY=your_google_gemini_api_key
    XAI_API_KEY=your_grok_xai_api_key
@@ -435,6 +437,10 @@ For questions or issues:
    ADZUNA_APP_KEY=your_adzuna_app_key
    EMAIL_USER=your_smtp_email
    EMAIL_PASS=your_smtp_app_password
+   ADMIN_PASSWORD=your_admin_password
+   ADMIN_EMAIL=admin@example.com
+   TEST_USER_PASSWORD=your_test_user_password
+   TEST_USER_PASSWORD_ALT=your_test_user_password_alt
    ```
 4. Start the backend development server:
    ```bash

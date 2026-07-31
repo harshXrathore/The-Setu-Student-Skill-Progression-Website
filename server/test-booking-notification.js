@@ -21,11 +21,11 @@ async function testBooking() {
     const loginRes = await fetch('http://localhost:5000/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: 'student@example.com', password: 'password123' })
+        body: JSON.stringify({ email: 'student@example.com', password: process.env.TEST_USER_PASSWORD })
     });
 
     if (!loginRes.ok) {
-        console.log("Login failed. Ensure student@example.com / password123 exists.");
+        console.log("Login failed. Ensure student@example.com / TEST_USER_PASSWORD exists.");
         return;
     }
     const loginData = await loginRes.json();

@@ -1,6 +1,7 @@
 const API_URL = 'http://localhost:4000/api';
-const ADMIN_EMAIL = 'thesetu0@gmail.com';
-const ADMIN_PASSWORD = 'Admin@123';
+require('dotenv').config();
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 async function verifyBackend() {
     console.log("🔍 Starting Admin Backend Verification (using fetch)...\n");

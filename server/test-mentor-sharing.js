@@ -5,7 +5,7 @@ const User = require('./models/User');
 
 dotenv.config();
 
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/dashboard';
+const MONGO_URI = process.env.MONGO_URI;
 
 async function runTest() {
     try {
@@ -22,7 +22,7 @@ async function runTest() {
         const tempMentor = await User.create({
             name: 'Test Mentor',
             email: `testmentor_${Date.now()}@example.com`,
-            password: 'password123',
+            password: process.env.TEST_USER_PASSWORD,
             role: 'mentor',
             isVerified: true
         });
@@ -30,7 +30,7 @@ async function runTest() {
         const tempStudent = await User.create({
             name: 'Test Student',
             email: `teststudent_${Date.now()}@example.com`,
-            password: 'password123',
+            password: process.env.TEST_USER_PASSWORD,
             role: 'user'
         });
 

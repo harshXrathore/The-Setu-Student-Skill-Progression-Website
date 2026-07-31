@@ -6,7 +6,7 @@ dotenv.config();
 
 const testSave = async () => {
     try {
-        await mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/career-path-ai');
+        await mongoose.connect(process.env.MONGO_URI_RAG);
         console.log("DB Connected");
 
         // Mock User ID (Replace with a valid one from your DB if strictly relational, 

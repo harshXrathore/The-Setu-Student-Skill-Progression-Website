@@ -1,10 +1,11 @@
+require('dotenv').config();
 const mongoose = require('mongoose');
 const User = require('./models/User');
 
-const MONGO_URI = 'mongodb://127.0.0.1:27017/dashboard'; // Default from .env check earlier
+const MONGO_URI = process.env.MONGO_URI; // Default from .env check earlier
 const API_URL = 'http://localhost:3000/api/admin/stats';
-const ADMIN_EMAIL = 'thesetu0@gmail.com';
-const ADMIN_PASSWORD = 'Admin@123';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 async function debugStats() {
     console.log("🔍 Debugging Stats...\n");

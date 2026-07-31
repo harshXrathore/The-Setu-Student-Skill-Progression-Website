@@ -6,7 +6,7 @@ const Session = require('./models/Session');
 const Roadmap = require('./models/Roadmap');
 const mentorController = require('./controllers/mentorController');
 
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/dashboard';
+const MONGO_URI = process.env.MONGO_URI;
 
 async function runTests() {
     console.log("Connecting to MongoDB...");
@@ -19,7 +19,7 @@ async function runTests() {
         const mentor = await User.create({
             name: 'Prog Mentor',
             email: mentorEmail,
-            password: 'password123',
+            password: process.env.TEST_USER_PASSWORD,
             role: 'mentor',
             isVerified: true
         });
@@ -34,7 +34,7 @@ async function runTests() {
         const student = await User.create({
             name: 'Prog Student',
             email: `student_prog_${Date.now()}@test.com`,
-            password: 'password123',
+            password: process.env.TEST_USER_PASSWORD,
             role: 'student'
         });
 
@@ -104,7 +104,7 @@ async function runTests() {
 
         // 7. Test getStudentRoadmap with Unauthorized Mentor
         const hackerMentor = await User.create({
-            name: 'Hacker', email: `hacker_${Date.now()}@test.com`, password: '123', role: 'mentor'
+            name: 'Hacker', email: `hacker_${Date.now()}@test.com`, password: process.env.TEST_USER_PASSWORD_ALT, role: 'mentor'
         });
         const reqRoadmapHacker = { user: { id: hackerMentor._id }, params: { id: student._id } };
         const resRoadmapHacker = {

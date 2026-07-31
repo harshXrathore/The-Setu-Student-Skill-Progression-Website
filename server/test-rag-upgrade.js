@@ -6,7 +6,7 @@ dotenv.config();
 
 const verifyUpgrades = async () => {
     try {
-        await mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/career-path-ai');
+        await mongoose.connect(process.env.MONGO_URI_RAG);
         console.log("DB Connected");
 
         // Test Case 1: Search for a NEW role (Cybersecurity) using Text Search

@@ -11,7 +11,7 @@ const testApi = async () => {
             admin = await User.create({
                 name: "Admin Temp",
                 email: "admin_temp@demo.com",
-                password: "password123",
+                password: process.env.TEST_USER_PASSWORD,
                 isAdmin: true
             });
         }
@@ -23,7 +23,7 @@ const testApi = async () => {
         const dummyUser = await User.create({
             name: "Delete Me",
             email: "delete2@test.com",
-            password: "password123"
+            password: process.env.TEST_USER_PASSWORD
         });
         console.log("Created dummy user:", dummyUser._id);
 

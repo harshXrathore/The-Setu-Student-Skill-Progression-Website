@@ -15,7 +15,7 @@ const test = async () => {
         const newUser = await User.create({
             name: "Delete Test",
             email: "delete@test.com",
-            password: "password123"
+            password: process.env.TEST_USER_PASSWORD
         });
         console.log(`Created test user: ${newUser._id}`);
 

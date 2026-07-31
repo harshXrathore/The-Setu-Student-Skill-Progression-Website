@@ -7,7 +7,7 @@ dotenv.config();
 // MOCKING the logic from skillController to verify retrieval without spinning up full Express app
 const testRAG = async () => {
     try {
-        await mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/career-path-ai');
+        await mongoose.connect(process.env.MONGO_URI_RAG);
         console.log("DB Connected");
 
         const targetRoleName = "Full Stack Developer";
