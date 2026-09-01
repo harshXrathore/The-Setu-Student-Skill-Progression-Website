@@ -14,7 +14,7 @@ const RoadmapSchema = z.object({
                         'completed',
                         'verified'
                     ]).default('pending'),
-                    type: z.string().min(1, "Skill type is required").transform(val => val.toLowerCase()),
+                    type: z.string().optional().default('fundamental').transform(val => (val ? val.toLowerCase() : 'fundamental')),
                     hours: z.number().int().nonnegative().optional().default(10),
                     progress: z.number().min(0).max(100).optional().default(0)
                 })

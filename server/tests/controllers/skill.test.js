@@ -34,6 +34,7 @@ describe('Skill Controller (AI Roadmap)', () => {
             status: jest.fn().mockReturnThis()
         };
         
+        Roadmap.create.mockImplementation(data => Promise.resolve(data));
         mockGenerateContent.mockClear();
     });
 
@@ -81,7 +82,7 @@ describe('Skill Controller (AI Roadmap)', () => {
         }));
     });
 
-    it('should return 500 if AI generation fails', async () => {
+    it('should use resilient fallback roadmap if AI generation fails', async () => {
         Roadmap.findOne.mockReturnValue({
             sort: jest.fn().mockResolvedValue(null)
         });
@@ -90,10 +91,28 @@ describe('Skill Controller (AI Roadmap)', () => {
         });
 
         mockGenerateContent.mockRejectedValue(new Error('AI API Error'));
+        Roadmap.prototype.save = jest.fn().mockResolvedValue(true);
+
+        await analyzeProfile(req, res);
+
+        expect(mockGenerateContent).toHaveBeenCalled();
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+            goal: 'Developer',
+            roadmapPhases: expect.any(Array)
+        }));
+    });
+
+    it('should return 500 if GEMINI_API_KEY is missing', async () => {
+        const originalKey = process.env.GEMINI_API_KEY;
+        delete process.env.GEMINI_API_KEY;
 
         await analyzeProfile(req, res);
 
         expect(res.status).toHaveBeenCalledWith(500);
-        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ error: 'AI generation failed' }));
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+            error: 'Server misconfiguration: AI key missing.'
+        }));
+
+        process.env.GEMINI_API_KEY = originalKey;
     });
 });
