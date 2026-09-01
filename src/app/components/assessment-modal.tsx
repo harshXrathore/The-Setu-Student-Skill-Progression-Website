@@ -273,6 +273,19 @@ export function AssessmentModal({
             </div>
 
             <div className="flex justify-end gap-3 pt-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setResult(null);
+                  setSelectedAnswers({});
+                  setCurrentQuestionIdx(0);
+                  setTimeSpent(0);
+                }}
+                className="w-full sm:w-auto"
+              >
+                <RotateCcw className="size-4 mr-1.5" />
+                Retake Test
+              </Button>
               <Button onClick={onClose} className="w-full sm:w-auto">
                 Done
               </Button>

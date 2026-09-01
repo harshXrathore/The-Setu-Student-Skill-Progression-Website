@@ -1,9 +1,10 @@
-import { Search, Filter, Briefcase, TrendingUp, DollarSign, Clock, CheckCircle, Target, BookOpen, Video, Code, Loader2, Zap, Lock, Sparkles, Award, AlertTriangle, Layers, ChevronDown, ChevronUp, History } from "lucide-react";
+import { Search, Filter, Briefcase, TrendingUp, DollarSign, Clock, CheckCircle, Target, BookOpen, Video, Code, Loader2, Zap, Lock, Sparkles, Award, Layers, ChevronDown, ChevronUp, History } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiRequest } from "../lib/api";
 import { useProfile } from "../context/profile-context";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
+import { Button } from "./ui/button";
 import { InteractiveSkillGraph } from "./interactive-skill-graph";
 import { AssessmentModal } from "./assessment-modal";
 import { getAdaptiveRoadmap } from "../lib/adaptiveApi";
@@ -490,7 +491,6 @@ export function DetailedCareerExplorer() {
 
 export function DetailedSkillRoadmap() {
   const [activeTab, setActiveTab] = useState<"phases" | "graph">("phases");
-  const [roadmap, setRoadmap] = useState<any>(null);
   const [roadmapPhases, setRoadmapPhases] = useState<any[]>([]);
   const [roadmapId, setRoadmapId] = useState<string>('');
   const [roadmapGoal, setRoadmapGoal] = useState<string>('');
@@ -515,7 +515,6 @@ export function DetailedSkillRoadmap() {
       });
 
       if (data?.roadmapPhases) {
-        setRoadmap(data);
         setRoadmapPhases(data.roadmapPhases);
         setRoadmapId(data._id || '');
         setRoadmapGoal(data.goal || '');
@@ -529,7 +528,6 @@ export function DetailedSkillRoadmap() {
           try {
             const parsed = JSON.parse(stored);
             if (parsed?.roadmapPhases) {
-              setRoadmap(parsed);
               setRoadmapPhases(parsed.roadmapPhases);
               setRoadmapId(parsed._id || '');
               setRoadmapGoal(parsed.goal || '');
@@ -599,7 +597,6 @@ export function DetailedSkillRoadmap() {
       });
       if (newRoadmap?.roadmapPhases) {
         localStorage.removeItem('generatedSkills');
-        setRoadmap(newRoadmap);
         setRoadmapPhases(newRoadmap.roadmapPhases);
         setRoadmapId(newRoadmap._id || '');
         setRoadmapGoal(newRoadmap.goal || '');
@@ -758,6 +755,11 @@ export function DetailedSkillRoadmap() {
 
         {/* View Switcher Tabs & Actions */}
         <div className="flex flex-wrap items-center gap-3">
+          <div className="hidden sm:flex flex-col items-end pr-2 border-r border-border">
+            <span className="text-sm font-black text-primary">{overallProgress}%</span>
+            <span className="text-[10px] text-muted-foreground font-medium">Roadmap Progress</span>
+          </div>
+
           <div className="flex bg-secondary p-1 rounded-xl border border-border">
             <button
               onClick={() => setActiveTab("phases")}
