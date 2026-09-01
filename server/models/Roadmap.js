@@ -18,16 +18,52 @@ const roadmapSchema = mongoose.Schema({
         phase: String,
         duration: String,
         skills: [{
-            name: String,
+            name: { type: String, required: true },
             status: {
                 type: String,
-                enum: ['pending', 'in-progress', 'completed', 'verified'],
+                enum: ['pending', 'in-progress', 'completed', 'verified', 'mastered', 'locked', 'remediation'],
                 default: 'pending'
             },
             type: { type: String },
-            hours: Number
+            hours: { type: Number, default: 10 },
+            masteryScore: { type: Number, default: 0 },
+            level: { type: String, default: 'Beginner' },
+            confidenceScore: { type: Number, default: 50 },
+            assessmentScore: { type: Number, default: 0 },
+            mistakeCount: { type: Number, default: 0 },
+            prerequisites: [{ type: String }],
+            isBlocked: { type: Boolean, default: false },
+            blockedReason: { type: String, default: '' },
+            recommendedAction: { type: String, default: '' },
+            recommendationReason: { type: String, default: '' },
+            courses: [{
+                _id: String,
+                title: String,
+                difficulty: String,
+                skillTag: String,
+                reason: String
+            }]
         }]
     }],
+    version: {
+        type: Number,
+        default: 1
+    },
+    versionHistory: [{
+        version: Number,
+        reason: String,
+        timestamp: { type: Date, default: Date.now },
+        changedSkills: [String],
+        summary: String
+    }],
+    overallMastery: {
+        type: Number,
+        default: 0
+    },
+    skillGapsCount: {
+        type: Number,
+        default: 0
+    },
     generatedAt: {
         type: Date,
         default: Date.now

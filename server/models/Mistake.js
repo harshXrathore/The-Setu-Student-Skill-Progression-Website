@@ -35,4 +35,7 @@ const mistakeSchema = new mongoose.Schema({
     timestamps: true
 });
 
+mistakeSchema.index({ userId: 1, skillTag: 1, status: 1 });
+mistakeSchema.index({ userId: 1, createdAt: -1 });
+
 module.exports = mongoose.model('Mistake', mistakeSchema);

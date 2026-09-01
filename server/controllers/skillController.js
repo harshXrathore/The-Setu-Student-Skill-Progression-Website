@@ -2,7 +2,11 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const Roadmap = require('../models/Roadmap');
 const RoleGuide = require('../models/RoleGuide');
 const Course = require('../models/Course');
+const SkillMastery = require('../models/SkillMastery');
 const MistakeAnalysisService = require('../services/mistakeAnalysis.service');
+const MasteryEngineService = require('../services/masteryEngine.service');
+const SkillGraphService = require('../services/skillGraph.service');
+const CourseRecommendationService = require('../services/courseRecommendation.service');
 const RoadmapSchema = require('../validators/roadmapSchema');
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
@@ -382,6 +386,14 @@ const updateSkillStatus = async (req, res) => {
     }
 
     await roadmap.save();
+
+    // Trigger mastery recalculation in background
+    try {
+      await MasteryEngineService.recalculateUserSkillMastery(req.user.id, decodedName);
+    } catch (mErr) {
+      console.error('Failed to recalculate mastery on status change:', mErr);
+    }
+
     res.json(roadmap);
   } catch (err) {
     console.error('updateSkillStatus error:', err.message);
@@ -389,8 +401,80 @@ const updateSkillStatus = async (req, res) => {
   }
 };
 
+// @desc    Get user's skill mastery list & summary
+// @route   GET /api/skills/mastery
+// @access  Private
+const getUserSkillMastery = async (req, res) => {
+  try {
+    const [masteries, summary] = await Promise.all([
+      SkillMastery.find({ userId: req.user.id }).sort({ masteryScore: -1 }),
+      MasteryEngineService.getUserMasterySummary(req.user.id)
+    ]);
+    res.json({ masteries, summary });
+  } catch (err) {
+    console.error('getUserSkillMastery error:', err);
+    res.status(500).json({ error: 'Failed to retrieve skill mastery' });
+  }
+};
+
+// @desc    Get interactive skill dependency graph
+// @route   GET /api/skills/graph
+// @access  Private
+const getSkillGraph = async (req, res) => {
+  try {
+    const graphData = await SkillGraphService.getSkillGraphData(req.user.id);
+    res.json(graphData);
+  } catch (err) {
+    console.error('getSkillGraph error:', err);
+    res.status(500).json({ error: 'Failed to retrieve skill graph' });
+  }
+};
+
+// @desc    Get skill gaps & active weak skills
+// @route   GET /api/skills/gaps
+// @access  Private
+const getSkillGaps = async (req, res) => {
+  try {
+    const mistakeAnalytics = await MistakeAnalysisService.getDetailedSkillMistakeAnalytics(req.user.id);
+    const summary = await MasteryEngineService.getUserMasterySummary(req.user.id);
+    res.json({
+      weakSkills: summary.weakestSkills,
+      skillGapsCount: summary.skillGapsCount,
+      mistakeAnalytics
+    });
+  } catch (err) {
+    console.error('getSkillGaps error:', err);
+    res.status(500).json({ error: 'Failed to retrieve skill gaps' });
+  }
+};
+
+// @desc    Get semantic course recommendations for skills
+// @route   GET /api/skills/recommendations
+// @access  Private
+const getSkillRecommendations = async (req, res) => {
+  try {
+    const { skill } = req.query;
+    if (skill) {
+      const courses = await CourseRecommendationService.recommendCoursesForSkill(req.user.id, skill);
+      return res.json({ skill, recommendations: courses });
+    }
+
+    const summary = await MasteryEngineService.getUserMasterySummary(req.user.id);
+    const topWeakSkills = summary.weakestSkills.map(w => w.name);
+    const recommendations = await CourseRecommendationService.recommendCoursesForSkillList(req.user.id, topWeakSkills);
+    res.json({ recommendations });
+  } catch (err) {
+    console.error('getSkillRecommendations error:', err);
+    res.status(500).json({ error: 'Failed to retrieve recommendations' });
+  }
+};
+
 module.exports = {
   analyzeProfile,
   getLatestRoadmap,
-  updateSkillStatus
+  updateSkillStatus,
+  getUserSkillMastery,
+  getSkillGraph,
+  getSkillGaps,
+  getSkillRecommendations
 };

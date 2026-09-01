@@ -54,7 +54,9 @@ app.use("/api/admin", require("./routes/adminRoutes"));
 app.use("/api/upload", require("./routes/upload"));
 app.use("/api/notifications", require("./routes/notifications"));
 app.use("/api/learning-progress", require("./routes/learningProgressRoutes"));
-app.use("/api/ai", require("./routes/aiAssistant")); // Grok AI Assistant
+app.use("/api/assessments", require("./routes/assessmentRoutes"));
+app.use("/api/adaptive", require("./routes/adaptiveRoutes"));
+app.use("/api/ai", require("./routes/aiAssistant")); // Groq + LLaMA 3.3 70B AI Assistant
 app.use("/api/careers", require("./routes/careerRoutes"));
 app.use("/api/gamification", require("./routes/gamification"));
 app.use("/api/resources", require("./routes/resources"));

@@ -30,6 +30,7 @@ import { ActivityHeatmap } from "./ui/activity-heatmap";
 import { CircularProgress, BadgeStack, StatCard } from "./ui/stats-widgets";
 
 import { ProfileSetupPopup } from "./profile-setup-popup";
+import { SkillIntelligencePanel } from "./skill-intelligence-panel";
 
 export function DashboardMain() {
   const [showSetupPopup, setShowSetupPopup] = useState(false);
@@ -240,6 +241,8 @@ function DashboardHome() {
           delay={0.4}
         />
       </div>
+      {/* 2.5 Skill Intelligence & Mastery Metrics */}
+      <SkillIntelligencePanel />
 
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Left Col - 2/3 */}

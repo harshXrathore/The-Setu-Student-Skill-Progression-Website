@@ -11,6 +11,21 @@ const skillSchema = new mongoose.Schema({
         type: String,
         default: 'General'
     },
+    description: {
+        type: String,
+        default: ''
+    },
+    difficulty: {
+        type: String,
+        enum: ['beginner', 'intermediate', 'advanced'],
+        default: 'intermediate'
+    },
+    prerequisites: [{ 
+        type: String 
+    }],
+    dependents: [{ 
+        type: String 
+    }],
     relatedSkills: [{ 
         type: String 
     }]
