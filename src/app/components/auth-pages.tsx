@@ -9,11 +9,20 @@ export function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Forgot Password States
+  const [isForgotMode, setIsForgotMode] = useState(false);
+  const [forgotStep, setForgotStep] = useState<1 | 2>(1);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotOtp, setForgotOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setSuccessMsg("");
     setLoading(true);
 
     try {
@@ -38,6 +47,48 @@ export function LoginPage() {
     }
   };
 
+  const handleRequestForgotOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setSuccessMsg("");
+    setLoading(true);
+
+    try {
+      const resp = await apiRequest<{ message: string }>('/auth/forgot-password', {
+        method: 'POST',
+        body: JSON.stringify({ email: forgotEmail })
+      });
+      setSuccessMsg(resp.message || "OTP sent to your registered email address.");
+      setForgotStep(2);
+    } catch (err: any) {
+      setError(err.message || "Failed to request password reset OTP");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setSuccessMsg("");
+    setLoading(true);
+
+    try {
+      const resp = await apiRequest<{ message: string }>('/auth/reset-password', {
+        method: 'POST',
+        body: JSON.stringify({ email: forgotEmail, otp: forgotOtp, newPassword })
+      });
+      setSuccessMsg(resp.message || "Password reset successful! You can now log in.");
+      setIsForgotMode(false);
+      setForgotStep(1);
+      setEmail(forgotEmail);
+    } catch (err: any) {
+      setError(err.message || "Failed to reset password");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 transition-colors duration-300">
       <div className="w-full max-w-md">
@@ -47,12 +98,16 @@ export function LoginPage() {
             <GraduationCap className="size-10 text-primary" />
             <span className="text-3xl font-bold text-foreground">The-Setu</span>
           </div>
-          <p className="text-muted-foreground">Welcome back! Please login to your account.</p>
+          <p className="text-muted-foreground">
+            {isForgotMode ? "Reset your account password" : "Welcome back! Please login to your account."}
+          </p>
         </div>
 
-        {/* Login Form */}
+        {/* Card Container */}
         <div className="bg-card text-card-foreground rounded-2xl shadow-xl p-8 border border-border">
-          <h2 className="text-2xl font-bold mb-6">Login</h2>
+          <h2 className="text-2xl font-bold mb-6">
+            {isForgotMode ? (forgotStep === 1 ? "Forgot Password" : "Set New Password") : "Login"}
+          </h2>
 
           {error && (
             <div className="mb-4 p-3 rounded-lg bg-red-100 text-red-600 text-sm font-medium">
@@ -60,78 +115,206 @@ export function LoginPage() {
             </div>
           )}
 
-          <form onSubmit={handleLogin} className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                Email Address
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-5 text-muted-foreground" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 bg-secondary/50 border border-input rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
-                  placeholder="you@example.com"
-                  required
-                />
-              </div>
+          {successMsg && (
+            <div className="mb-4 p-3 rounded-lg bg-green-100 text-green-700 text-sm font-medium">
+              {successMsg}
             </div>
+          )}
 
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-5 text-muted-foreground" />
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-11 pr-11 py-3 bg-secondary/50 border border-input rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
-                  placeholder="••••••••"
-                  required
-                />
+          {/* Regular Login View */}
+          {!isForgotMode && (
+            <form onSubmit={handleLogin} className="space-y-5">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Email Address
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-5 text-muted-foreground" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full pl-11 pr-4 py-3 bg-secondary/50 border border-input rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                    placeholder="you@example.com"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Password
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-5 text-muted-foreground" />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full pl-11 pr-11 py-3 bg-secondary/50 border border-input rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                    placeholder="••••••••"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" className="size-4 rounded border-input bg-secondary text-primary focus:ring-primary" />
+                  <span className="text-sm text-muted-foreground">Remember me</span>
+                </label>
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  onClick={() => {
+                    setIsForgotMode(true);
+                    setForgotEmail(email);
+                    setError("");
+                    setSuccessMsg("");
+                  }}
+                  className="text-sm text-primary hover:text-primary/80 font-semibold"
                 >
-                  {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                  Forgot password?
                 </button>
               </div>
-            </div>
 
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2">
-                <input type="checkbox" className="size-4 rounded border-input bg-secondary text-primary focus:ring-primary" />
-                <span className="text-sm text-muted-foreground">Remember me</span>
-              </label>
-              <button type="button" className="text-sm text-primary hover:text-primary/80">
-                Forgot password?
-              </button>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 font-semibold transition-colors flex items-center justify-center gap-2"
-            >
-              {loading ? <Loader2 className="size-5 animate-spin" /> : "Sign In"}
-            </button>
-          </form>
-
-          <div className="mt-6 text-center">
-            <p className="text-sm text-muted-foreground">
-              Don't have an account?{" "}
               <button
-                onClick={() => navigate('/signup')}
-                className="text-primary hover:text-primary/80 font-semibold"
+                type="submit"
+                disabled={loading}
+                className="w-full py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 font-semibold transition-colors flex items-center justify-center gap-2"
               >
-                Sign up
+                {loading ? <Loader2 className="size-5 animate-spin" /> : "Sign In"}
               </button>
-            </p>
-          </div>
+            </form>
+          )}
+
+          {/* Forgot Password View - Step 1: Request OTP */}
+          {isForgotMode && forgotStep === 1 && (
+            <form onSubmit={handleRequestForgotOtp} className="space-y-5">
+              <p className="text-sm text-muted-foreground mb-2">
+                Enter your registered email address and we will send a 6-digit verification code to reset your password.
+              </p>
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Registered Email Address
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-5 text-muted-foreground" />
+                  <input
+                    type="email"
+                    value={forgotEmail}
+                    onChange={(e) => setForgotEmail(e.target.value)}
+                    className="w-full pl-11 pr-4 py-3 bg-secondary/50 border border-input rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                    placeholder="you@example.com"
+                    required
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 font-semibold transition-colors flex items-center justify-center gap-2"
+              >
+                {loading ? <Loader2 className="size-5 animate-spin" /> : "Send Reset Code"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsForgotMode(false);
+                  setError("");
+                  setSuccessMsg("");
+                }}
+                className="w-full text-center text-sm text-muted-foreground hover:text-foreground mt-2"
+              >
+                ← Back to Login
+              </button>
+            </form>
+          )}
+
+          {/* Forgot Password View - Step 2: Enter OTP & New Password */}
+          {isForgotMode && forgotStep === 2 && (
+            <form onSubmit={handleResetPassword} className="space-y-5">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  6-Digit OTP Code
+                </label>
+                <input
+                  type="text"
+                  maxLength={6}
+                  value={forgotOtp}
+                  onChange={(e) => setForgotOtp(e.target.value)}
+                  className="w-full text-center letter-spacing-2 text-2xl font-mono py-3 bg-secondary/50 border border-input rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                  placeholder="123456"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  New Password
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-5 text-muted-foreground" />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="w-full pl-11 pr-11 py-3 bg-secondary/50 border border-input rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                    placeholder="Min 6 chars (Upper, Lower, Number, Symbol)"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 font-semibold transition-colors flex items-center justify-center gap-2"
+              >
+                {loading ? <Loader2 className="size-5 animate-spin" /> : "Reset Password"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setForgotStep(1);
+                  setError("");
+                }}
+                className="w-full text-center text-sm text-muted-foreground hover:text-foreground mt-2"
+              >
+                ← Change Email / Resend Code
+              </button>
+            </form>
+          )}
+
+          {!isForgotMode && (
+            <div className="mt-6 text-center">
+              <p className="text-sm text-muted-foreground">
+                Don't have an account?{" "}
+                <button
+                  onClick={() => navigate('/signup')}
+                  className="text-primary hover:text-primary/80 font-semibold"
+                >
+                  Sign up
+                </button>
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="text-center mt-6">
@@ -175,7 +358,7 @@ export function SignupPage() {
         method: 'POST',
         body: JSON.stringify({ name: formData.name, email: formData.email, role: formData.role })
       });
-      setSuccessMsg(resp.message || "OTP sent! Please check your email.");
+      setSuccessMsg(resp.message || "OTP sent to your registered email address.");
       setStep(2);
     } catch (err: any) {
       setError(err.message || "Signup failed");

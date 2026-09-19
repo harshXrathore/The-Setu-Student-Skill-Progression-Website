@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
-    "dev": "vite"
+    "dev": "vite",
+    "start": "node server/server.js",
+    "render-build": "npm install && cd server && npm install && cd .. && vite build"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",

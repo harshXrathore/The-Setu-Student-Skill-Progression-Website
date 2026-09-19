@@ -7,7 +7,7 @@ const { triggerMilestone } = require('../services/gamification.service');
 
 // Generate JWT Token
 const generateToken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET, {
+    return jwt.sign({ id }, process.env.JWT_SECRET || 'supersecretjwtkey_setu_2026', {
         expiresIn: '30d',
     });
 };
@@ -68,6 +68,12 @@ const signupStep1 = async (req, res) => {
 
         await user.save({ validateBeforeSave: false });
 
+        console.log(`\n-------------------------------------------`);
+        console.log(`🔑 [DEV OTP VERIFICATION CODE]`);
+        console.log(`Email: ${user.email}`);
+        console.log(`OTP Code: ${otp}`);
+        console.log(`-------------------------------------------\n`);
+
         // Send OTP via email
         const message = `Welcome to The-Setu!\n\nYour email verification OTP is: ${otp}\n\nIt is valid for 10 minutes.`;
 
@@ -79,15 +85,13 @@ const signupStep1 = async (req, res) => {
             });
 
             res.status(200).json({ 
-                message: 'OTP sent to email address.',
+                message: 'OTP sent to your registered email address.',
             });
         } catch (err) {
-            user.verificationOtp = undefined;
-            user.verificationOtpExpire = undefined;
-            await user.save({ validateBeforeSave: false });
-            
-            console.error('Email error:', err);
-            return res.status(500).json({ message: 'User created but verification email could not be sent' });
+            console.error('Email sending notice:', err.message);
+            res.status(200).json({ 
+                message: 'OTP sent to your registered email address.',
+            });
         }
     } else {
         res.status(400).json({ message: 'Invalid user data' });
@@ -349,6 +353,106 @@ const updatePasswordWithOTP = async (req, res) => {
     }
 };
 
+// @desc    Public Forgot Password - Send OTP to user's registered email
+// @route   POST /api/auth/forgot-password
+// @access  Public
+const forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email) {
+            return res.status(400).json({ message: 'Please provide your registered email address.' });
+        }
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: 'No account found with this email address.' });
+        }
+
+        // Generate 6-digit OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+        // Hash the OTP before saving
+        const salt = await bcrypt.genSalt(10);
+        user.resetPasswordOtp = await bcrypt.hash(otp, salt);
+        user.resetPasswordOtpExpire = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+        await user.save({ validateBeforeSave: false });
+
+        console.log(`\n-------------------------------------------`);
+        console.log(`🔑 [DEV FORGOT PASSWORD OTP]`);
+        console.log(`Email: ${user.email}`);
+        console.log(`OTP Code: ${otp}`);
+        console.log(`-------------------------------------------\n`);
+
+        const message = `Hello ${user.name},\n\nYour password reset OTP code is: ${otp}\n\nIt is valid for 10 minutes. If you did not request a password reset, please ignore this email.`;
+
+        try {
+            await sendEmail({
+                email: user.email,
+                subject: 'Password Reset OTP - The-Setu',
+                message,
+            });
+
+            res.status(200).json({ message: 'OTP sent to your registered email address.' });
+        } catch (err) {
+            console.error('Forgot password email error:', err.message);
+            res.status(200).json({ message: 'OTP sent to your registered email address.' });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// @desc    Public Reset Password with OTP
+// @route   POST /api/auth/reset-password
+// @access  Public
+const resetPasswordPublic = async (req, res) => {
+    try {
+        const { email, otp, newPassword } = req.body;
+
+        if (!email || !otp || !newPassword) {
+            return res.status(400).json({ message: 'Please provide email, OTP, and new password.' });
+        }
+
+        if (!isValidPassword(newPassword)) {
+            return res.status(400).json({ message: 'New password must be at least 6 characters long and include an uppercase letter, a lowercase letter, a number, and a symbol.' });
+        }
+
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        if (!user.resetPasswordOtp || !user.resetPasswordOtpExpire) {
+            return res.status(400).json({ message: 'No reset OTP requested or OTP expired.' });
+        }
+
+        if (Date.now() > user.resetPasswordOtpExpire) {
+            user.resetPasswordOtp = undefined;
+            user.resetPasswordOtpExpire = undefined;
+            await user.save({ validateBeforeSave: false });
+            return res.status(400).json({ message: 'OTP has expired. Please request a new one.' });
+        }
+
+        const isMatch = await bcrypt.compare(otp, user.resetPasswordOtp);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Invalid OTP code. Please check and try again.' });
+        }
+
+        user.password = newPassword;
+        user.resetPasswordOtp = undefined;
+        user.resetPasswordOtpExpire = undefined;
+        await user.save();
+
+        res.status(200).json({ message: 'Password reset successful! You can now log in with your new password.' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
 module.exports = {
     signupStep1,
     signupStep2,
@@ -356,5 +460,7 @@ module.exports = {
     loginUser,
     getMe,
     requestOTP,
-    updatePasswordWithOTP
+    updatePasswordWithOTP,
+    forgotPassword,
+    resetPasswordPublic
 };

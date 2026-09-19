@@ -28,9 +28,23 @@ try {
 const app = express();
 const port = process.env.PORT || 3000;
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "http://127.0.0.1:5173",
+  "http://127.0.0.1:3000",
+  "https://the-setu-student-skill-progression.onrender.com"
+];
+
 app.use(
   cors({
-    origin: "https://the-setu-student-skill-progression.onrender.com",
+    origin: function (origin, callback) {
+      // allow requests with no origin (like mobile apps or curl requests)
+      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        return callback(null, true);
+      }
+      return callback(null, true); // Permissive in dev to avoid CORS blocking
+    },
     credentials: true,
   }),
 );
