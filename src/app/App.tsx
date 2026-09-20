@@ -2,6 +2,8 @@ import { Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 
+import { ProtectedRoute, PublicOnlyRoute } from "./components/ProtectedRoute";
+
 // Lazy imports
 const LandingPage = lazy(() => import("./components/landing-page").then(module => ({ default: module.LandingPage })));
 const LoginPage = lazy(() => import("./components/auth-pages").then(module => ({ default: module.LoginPage })));
@@ -35,10 +37,10 @@ export default function App() {
             <Suspense fallback={<LoadingFallback />}>
               <Routes>
                 <Route path="/" element={<LandingPage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/signup" element={<SignupPage />} />
-                <Route path="/dashboard/*" element={<DashboardMain />} />
-                <Route path="/mentor-dashboard/*" element={<MentorDashboard />} />
+                <Route path="/login" element={<PublicOnlyRoute><LoginPage /></PublicOnlyRoute>} />
+                <Route path="/signup" element={<PublicOnlyRoute><SignupPage /></PublicOnlyRoute>} />
+                <Route path="/dashboard/*" element={<ProtectedRoute allowedRole="student"><DashboardMain /></ProtectedRoute>} />
+                <Route path="/mentor-dashboard/*" element={<ProtectedRoute allowedRole="mentor"><MentorDashboard /></ProtectedRoute>} />
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/admin/login" element={<AdminLoginPage />} />
                 <Route path="/docs" element={<DocumentationPage />} />
