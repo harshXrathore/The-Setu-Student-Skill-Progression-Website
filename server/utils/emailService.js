@@ -119,25 +119,7 @@ const sendEmail = async (options) => {
       </div>
     `;
 
-    // 1. Try Resend HTTPS API if key present
-    if (process.env.RESEND_API_KEY) {
-        try {
-            return await sendViaResend(options, fromName, fromAddress, htmlMessage);
-        } catch (err) {
-            console.error('⚠️ Resend API error:', err.message);
-        }
-    }
-
-    // 2. Try Brevo HTTPS API if key present
-    if (process.env.BREVO_API_KEY) {
-        try {
-            return await sendViaBrevo(options, fromName, fromAddress, htmlMessage);
-        } catch (err) {
-            console.error('⚠️ Brevo API error:', err.message);
-        }
-    }
-
-    // 3. Try SMTP Transporter
+    // 1. Try Direct SMTP Transporter (Gmail) first with IPv4 DNS resolution
     const transporter = await getTransporter();
     if (transporter) {
         try {
@@ -151,12 +133,28 @@ const sendEmail = async (options) => {
             };
 
             const info = await transporter.sendMail(message);
-            console.log('📧 Message sent successfully to %s (ID: %s)', options.email, info.messageId);
+            console.log('📧 Message sent successfully via SMTP to %s (ID: %s)', options.email, info.messageId);
             return info;
         } catch (smtpErr) {
-            console.error('⚠️ SMTP connection timed out or failed on cloud server:', smtpErr.message);
-            console.warn('💡 Tip: Render blocks direct outbound SMTP sockets. Add RESEND_API_KEY (free at https://resend.com) for 100% reliable HTTPS email delivery.');
-            throw smtpErr;
+            console.error('⚠️ SMTP connection error:', smtpErr.message);
+        }
+    }
+
+    // 2. Try Resend HTTPS API if key present
+    if (process.env.RESEND_API_KEY) {
+        try {
+            return await sendViaResend(options, fromName, fromAddress, htmlMessage);
+        } catch (err) {
+            console.error('⚠️ Resend API error:', err.message);
+        }
+    }
+
+    // 3. Try Brevo HTTPS API if key present
+    if (process.env.BREVO_API_KEY) {
+        try {
+            return await sendViaBrevo(options, fromName, fromAddress, htmlMessage);
+        } catch (err) {
+            console.error('⚠️ Brevo API error:', err.message);
         }
     }
 
