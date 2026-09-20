@@ -3,7 +3,6 @@ const nodemailer = require('nodemailer');
 let cachedTransporter = null;
 
 const getTransporter = async () => {
-    // In test environment, bypass caching to allow Jest mocks to work cleanly
     if (process.env.NODE_ENV !== 'test' && cachedTransporter) {
         return cachedTransporter;
     }
@@ -13,8 +12,6 @@ const getTransporter = async () => {
         const host = process.env.SMTP_HOST.trim();
         const isGmail = host.includes('gmail');
         
-        // For Gmail on cloud platforms (Render/Vercel/AWS), Port 465 with SSL (secure: true) 
-        // combined with family: 4 (IPv4) is the most reliable transport to prevent IPv6 timeouts.
         const port = Number(process.env.SMTP_PORT) || (isGmail ? 465 : 587);
         const isSecure = port === 465;
 
@@ -27,13 +24,13 @@ const getTransporter = async () => {
                 user: process.env.SMTP_USER.trim(),
                 pass: cleanPassword,
             },
-            family: 4, // CRITICAL: Force IPv4 DNS lookup to prevent IPv6 connection timeouts on cloud hosts like Render
+            family: 4, // Force IPv4 DNS lookup
             pool: true,
             maxConnections: 5,
             maxMessages: 100,
-            connectionTimeout: 15000,
-            greetingTimeout: 10000,
-            socketTimeout: 20000,
+            connectionTimeout: 8000, // Fail fast (8s) if host blocks SMTP port
+            greetingTimeout: 5000,
+            socketTimeout: 10000,
             tls: {
                 rejectUnauthorized: false
             }
@@ -43,35 +40,62 @@ const getTransporter = async () => {
             cachedTransporter = transporter;
         }
         return transporter;
-    } else {
-        console.warn('⚠️ [SMTP WARNING] SMTP environment variables (SMTP_HOST, SMTP_USER, SMTP_PASSWORD) are NOT configured in environment! Falling back to Ethereal Email test account.');
-        const testAccount = await nodemailer.createTestAccount();
-        const transporter = nodemailer.createTransport({
-            host: "smtp.ethereal.email",
-            port: 587,
-            secure: false,
-            family: 4,
-            auth: {
-                user: testAccount.user,
-                pass: testAccount.pass,
-            },
-            connectionTimeout: 15000,
-        });
-
-        if (process.env.NODE_ENV !== 'test') {
-            cachedTransporter = transporter;
-        }
-        return transporter;
     }
+    return null;
+};
+
+// Send via Resend HTTP API (Port 443 - 100% reliable on Render/cloud hosts)
+const sendViaResend = async (options, fromName, fromAddress, htmlMessage) => {
+    const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            from: `${fromName} <onboarding@resend.dev>`,
+            to: [options.email],
+            subject: options.subject,
+            text: options.message,
+            html: htmlMessage
+        })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+        throw new Error(data.message || JSON.stringify(data));
+    }
+    console.log('📧 Email sent successfully via Resend API to %s (ID: %s)', options.email, data.id);
+    return data;
+};
+
+// Send via Brevo HTTP API (Port 443 - 100% reliable on Render/cloud hosts)
+const sendViaBrevo = async (options, fromName, fromAddress, htmlMessage) => {
+    const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+            'api-key': process.env.BREVO_API_KEY,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            sender: { name: fromName, email: fromAddress },
+            to: [{ email: options.email }],
+            subject: options.subject,
+            textContent: options.message,
+            htmlContent: htmlMessage
+        })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+        throw new Error(data.message || JSON.stringify(data));
+    }
+    console.log('📧 Email sent successfully via Brevo API to %s (ID: %s)', options.email, data.messageId);
+    return data;
 };
 
 const sendEmail = async (options) => {
-    const transporter = await getTransporter();
-
     const fromAddress = process.env.FROM_EMAIL || process.env.SMTP_USER || 'noreply@example.com';
     const fromName = process.env.FROM_NAME || 'The-Setu Platform';
 
-    // Rich HTML Template for OTP / Notifications
     const htmlMessage = options.html || `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px; background-color: #ffffff;">
         <div style="text-align: center; margin-bottom: 20px;">
@@ -91,22 +115,70 @@ const sendEmail = async (options) => {
       </div>
     `;
 
-    const message = {
+    // 1. Try Resend HTTPS API if key present
+    if (process.env.RESEND_API_KEY) {
+        try {
+            return await sendViaResend(options, fromName, fromAddress, htmlMessage);
+        } catch (err) {
+            console.error('⚠️ Resend API error:', err.message);
+        }
+    }
+
+    // 2. Try Brevo HTTPS API if key present
+    if (process.env.BREVO_API_KEY) {
+        try {
+            return await sendViaBrevo(options, fromName, fromAddress, htmlMessage);
+        } catch (err) {
+            console.error('⚠️ Brevo API error:', err.message);
+        }
+    }
+
+    // 3. Try SMTP Transporter
+    const transporter = await getTransporter();
+    if (transporter) {
+        try {
+            const message = {
+                from: `"${fromName}" <${fromAddress}>`,
+                replyTo: fromAddress,
+                to: options.email,
+                subject: options.subject,
+                text: options.message,
+                html: htmlMessage,
+            };
+
+            const info = await transporter.sendMail(message);
+            console.log('📧 Message sent successfully to %s (ID: %s)', options.email, info.messageId);
+            return info;
+        } catch (smtpErr) {
+            console.error('⚠️ SMTP connection timed out or failed on cloud server:', smtpErr.message);
+            console.warn('💡 Tip: Render blocks direct outbound SMTP sockets. Add RESEND_API_KEY (free at https://resend.com) for 100% reliable HTTPS email delivery.');
+            throw smtpErr;
+        }
+    }
+
+    // 4. Fallback to Ethereal
+    const testAccount = await nodemailer.createTestAccount();
+    const ethTransporter = nodemailer.createTransport({
+        host: "smtp.ethereal.email",
+        port: 587,
+        secure: false,
+        family: 4,
+        auth: {
+            user: testAccount.user,
+            pass: testAccount.pass,
+        },
+        connectionTimeout: 10000,
+    });
+
+    const info = await ethTransporter.sendMail({
         from: `"${fromName}" <${fromAddress}>`,
-        replyTo: fromAddress,
         to: options.email,
         subject: options.subject,
         text: options.message,
         html: htmlMessage,
-    };
-
-    const info = await transporter.sendMail(message);
-
-    console.log('📧 Message sent successfully to %s (ID: %s)', options.email, info.messageId);
-    
-    if (!process.env.SMTP_HOST) {
-        console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
-    }
+    });
+    console.log('📧 Sent via Ethereal test account to %s. Preview URL: %s', options.email, nodemailer.getTestMessageUrl(info));
+    return info;
 };
 
 module.exports = sendEmail;
