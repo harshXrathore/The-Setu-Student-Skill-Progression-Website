@@ -9,39 +9,35 @@ const getTransporter = async () => {
     }
 
     if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASSWORD) {
-        const isGmail = process.env.SMTP_HOST.includes('gmail');
         const cleanPassword = process.env.SMTP_PASSWORD.replace(/\s+/g, '');
+        const host = process.env.SMTP_HOST.trim();
+        const isGmail = host.includes('gmail');
         
-        const transporter = nodemailer.createTransport(
-            isGmail ? {
-                service: 'gmail',
-                auth: {
-                    user: process.env.SMTP_USER.trim(),
-                    pass: cleanPassword,
-                },
-                pool: true,
-                maxConnections: 5,
-                maxMessages: 100,
-                connectionTimeout: 10000,
-                greetingTimeout: 5000,
-                socketTimeout: 15000,
-            } : {
-                host: process.env.SMTP_HOST.trim(),
-                port: Number(process.env.SMTP_PORT) || 587,
-                secure: Number(process.env.SMTP_PORT) === 465,
-                auth: {
-                    user: process.env.SMTP_USER.trim(),
-                    pass: cleanPassword,
-                },
-                pool: true,
-                tls: {
-                    rejectUnauthorized: false
-                },
-                connectionTimeout: 10000,
-                greetingTimeout: 5000,
-                socketTimeout: 15000,
+        // For Gmail on cloud platforms (Render/Vercel/AWS), Port 465 with SSL (secure: true) 
+        // combined with family: 4 (IPv4) is the most reliable transport to prevent IPv6 timeouts.
+        const port = Number(process.env.SMTP_PORT) || (isGmail ? 465 : 587);
+        const isSecure = port === 465;
+
+        const transporter = nodemailer.createTransport({
+            host: isGmail ? 'smtp.gmail.com' : host,
+            port: port,
+            secure: isSecure,
+            requireTLS: !isSecure,
+            auth: {
+                user: process.env.SMTP_USER.trim(),
+                pass: cleanPassword,
+            },
+            family: 4, // CRITICAL: Force IPv4 DNS lookup to prevent IPv6 connection timeouts on cloud hosts like Render
+            pool: true,
+            maxConnections: 5,
+            maxMessages: 100,
+            connectionTimeout: 15000,
+            greetingTimeout: 10000,
+            socketTimeout: 20000,
+            tls: {
+                rejectUnauthorized: false
             }
-        );
+        });
 
         if (process.env.NODE_ENV !== 'test') {
             cachedTransporter = transporter;
@@ -54,11 +50,12 @@ const getTransporter = async () => {
             host: "smtp.ethereal.email",
             port: 587,
             secure: false,
+            family: 4,
             auth: {
                 user: testAccount.user,
                 pass: testAccount.pass,
             },
-            connectionTimeout: 10000,
+            connectionTimeout: 15000,
         });
 
         if (process.env.NODE_ENV !== 'test') {
