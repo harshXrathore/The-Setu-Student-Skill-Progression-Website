@@ -88,9 +88,9 @@ const signupStep1 = async (req, res) => {
                 message: 'OTP sent to your registered email address.',
             });
         } catch (err) {
-            console.error('Email sending notice:', err.message);
-            res.status(200).json({ 
-                message: 'OTP sent to your registered email address.',
+            console.error('❌ Email sending failed in signupStep1:', err.message);
+            res.status(500).json({ 
+                message: `Failed to send OTP email. ${err.message}`,
             });
         }
     } else {
@@ -395,8 +395,8 @@ const forgotPassword = async (req, res) => {
 
             res.status(200).json({ message: 'OTP sent to your registered email address.' });
         } catch (err) {
-            console.error('Forgot password email error:', err.message);
-            res.status(200).json({ message: 'OTP sent to your registered email address.' });
+            console.error('❌ Forgot password email error:', err.message);
+            res.status(500).json({ message: `Failed to send reset OTP email. ${err.message}` });
         }
     } catch (error) {
         console.error(error);

@@ -1,31 +1,56 @@
 const nodemailer = require('nodemailer');
 
-const sendEmail = async (options) => {
-    let transporter;
-    
+let cachedTransporter = null;
+
+const getTransporter = async () => {
+    // In test environment, bypass caching to allow Jest mocks to work cleanly
+    if (process.env.NODE_ENV !== 'test' && cachedTransporter) {
+        return cachedTransporter;
+    }
+
     if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASSWORD) {
         const isGmail = process.env.SMTP_HOST.includes('gmail');
+        const cleanPassword = process.env.SMTP_PASSWORD.replace(/\s+/g, '');
         
-        transporter = nodemailer.createTransport(
+        const transporter = nodemailer.createTransport(
             isGmail ? {
                 service: 'gmail',
                 auth: {
-                    user: process.env.SMTP_USER,
-                    pass: process.env.SMTP_PASSWORD,
+                    user: process.env.SMTP_USER.trim(),
+                    pass: cleanPassword,
                 },
+                pool: true,
+                maxConnections: 5,
+                maxMessages: 100,
+                connectionTimeout: 10000,
+                greetingTimeout: 5000,
+                socketTimeout: 15000,
             } : {
-                host: process.env.SMTP_HOST,
-                port: process.env.SMTP_PORT || 587,
-                secure: process.env.SMTP_PORT == 465,
+                host: process.env.SMTP_HOST.trim(),
+                port: Number(process.env.SMTP_PORT) || 587,
+                secure: Number(process.env.SMTP_PORT) === 465,
                 auth: {
-                    user: process.env.SMTP_USER,
-                    pass: process.env.SMTP_PASSWORD,
+                    user: process.env.SMTP_USER.trim(),
+                    pass: cleanPassword,
                 },
+                pool: true,
+                tls: {
+                    rejectUnauthorized: false
+                },
+                connectionTimeout: 10000,
+                greetingTimeout: 5000,
+                socketTimeout: 15000,
             }
         );
+
+        if (process.env.NODE_ENV !== 'test') {
+            cachedTransporter = transporter;
+        }
+        return transporter;
     } else {
+        console.warn('⚠️ [SMTP WARNING] SMTP environment variables (SMTP_HOST, SMTP_USER, SMTP_PASSWORD) are NOT configured in environment! Falling back to Ethereal Email test account.');
         const testAccount = await nodemailer.createTestAccount();
-        transporter = nodemailer.createTransport({
+        const transporter = nodemailer.createTransport({
             host: "smtp.ethereal.email",
             port: 587,
             secure: false,
@@ -33,8 +58,18 @@ const sendEmail = async (options) => {
                 user: testAccount.user,
                 pass: testAccount.pass,
             },
+            connectionTimeout: 10000,
         });
+
+        if (process.env.NODE_ENV !== 'test') {
+            cachedTransporter = transporter;
+        }
+        return transporter;
     }
+};
+
+const sendEmail = async (options) => {
+    const transporter = await getTransporter();
 
     const fromAddress = process.env.FROM_EMAIL || process.env.SMTP_USER || 'noreply@example.com';
     const fromName = process.env.FROM_NAME || 'The-Setu Platform';
